@@ -182,33 +182,6 @@ buffer_save(map_permanence, "permanence.pmap");
         </arguments>
       </action>
     </event>
-    <event eventtype="9" enumb="82">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>show_debug_message("objControl: R Pressed");
-show_debug_message("state="+string(state));
-if (state == SimState.observe) {
-    state = SimState.run;
-}
-</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
     <event eventtype="9" enumb="80">
       <action>
         <libid>1</libid>
@@ -226,7 +199,8 @@ if (state == SimState.observe) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>show_debug_message("objControl: P pressed");
+            <string>/// Go into placing state
+show_debug_message("objControl: P pressed");
 show_debug_message("state="+string(state));
 if (state == SimState.observe) {
     show_debug_message("About to switch back to place mode");
@@ -291,8 +265,15 @@ for (i = 0; i &lt; n; i++) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (instance_exists(objRobot)) {
+            <string>/// Run or stop simulation
+if (instance_exists(objRobot)) {
     if (state != SimState.run) {
+        if ((state == SimState.place) and (instance_exists(objPlacer))) {
+            with (objPlacer) {
+                show_debug_message("Deleting placer");
+                instance_destroy();
+            }
+        }
         state = SimState.run;
         running_length = 0;
     }
@@ -326,7 +307,6 @@ for (i = 0; i &lt; n; i++) {
 show_debug_message("state="+string(state)+", objPlacer exists = "+string(instance_exists(objPlacer)));
 if (state == SimState.place || state == SimState.run) {
     if ((state == SimState.place) and (instance_exists(objPlacer))) {
-        show_debug_message("Deleting placer");
         with (objPlacer) {
             show_debug_message("Deleting placer");
             instance_destroy();

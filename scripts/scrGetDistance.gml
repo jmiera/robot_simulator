@@ -9,7 +9,8 @@ inst = instance_create(start_x, start_y, objLaserParticle);
 inst.direction = dir;
 with (inst) {
     move_contact_solid(direction, max_dist);
-    actual_dist = distance_to_point(start_x, start_y);
+    actual_dist = distance_to_point(start_x, start_y); // sqrt(power(x - start_x, 2) + power(y - start_y, 2)); // 
+    if (actual_dist == 0 and (start_x != x or start_y != y)) {show_error("Laser particle distance calculated incorrectly!", 1);}
     end_x = x;
     end_y = y;
     instance_destroy();
