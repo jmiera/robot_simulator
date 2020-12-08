@@ -60,6 +60,7 @@ zbuf = buffer_create(32 * 60 * 2 * (num_sensors * 2), buffer_grow, 2); // Every 
 ubuf_noisy = buffer_create(32 * 60 * 2 * (2 * 4), buffer_grow, 4); // The buffer that contains the controls at each time step plus additive gaussian noise (2 32-bit floats: d_dist, d_dir)
 zbuf_noisy = buffer_create(32 * 60 * 2 * (num_sensors * 4), buffer_grow, 4); // The buffer that contains the measurements at each time step plus additive gaussian noise (num_sensors 32-bit floats)
 xbuf = buffer_create(32 * 60 * 2 * (4 + 4 + 4), buffer_grow, 4); // Stores the actual state at each step (3 64-bit floats - x, y, direction)
+xbuf2 = buffer_create(32 * 60 * 2 * (8 + 8 + 8), buffer_grow, 8);
 var abuf;
 abuf = buffer_create(num_sensors * 2, buffer_fixed, 2); // A buffer used to save the angles of the sensors to a file
 buffer_write(ubuf, buffer_s16, 0); // initially 0 d_dist and 0 d_dir
@@ -69,6 +70,9 @@ buffer_write(ubuf_noisy, buffer_f32, 0);
 buffer_write(xbuf, buffer_f32, x);
 buffer_write(xbuf, buffer_f32, y);
 buffer_write(xbuf, buffer_f32, direction);
+buffer_write(xbuf2, buffer_f64, x);
+buffer_write(xbuf2, buffer_f64, y);
+buffer_write(xbuf2, buffer_f64, direction);
 for (i = 0; i &lt; num_sensors; i++) {
     buffer_write(abuf, buffer_u16, angles[i]);
     var a = scrGetDistance(x,y,max_sensor_range,scrNormalizeAngle(direction + angles[i]));
@@ -190,6 +194,9 @@ if (instance_exists(objControl) and objControl.state == SimState.run and objCont
     buffer_write(xbuf, buffer_f32, x);
     buffer_write(xbuf, buffer_f32, y);
     buffer_write(xbuf, buffer_f32, direction);
+    buffer_write(xbuf2, buffer_f64, x);
+    buffer_write(xbuf2, buffer_f64, y);
+    buffer_write(xbuf2, buffer_f64, direction);
     objControl.running_length++;
     wasRunning = 1;
 } else if (instance_exists(objControl) and objControl.state != SimState.run and wasRunning) {
@@ -200,6 +207,7 @@ if (instance_exists(objControl) and objControl.state == SimState.run and objCont
     buffer_save(ubuf_noisy, "Controls_Noisy.data");
     buffer_save(zbuf_noisy, "Measurements_Noisy.data");
     buffer_save(xbuf, "State.data");
+    buffer_save(xbuf2, "State.part");
     var length_buf = buffer_create(100, buffer_grow, 1);
     buffer_write(length_buf, buffer_string, string(objControl.running_length));
     buffer_save(length_buf, "number_of_steps.data");

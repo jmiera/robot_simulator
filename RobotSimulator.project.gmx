@@ -38,6 +38,7 @@
     <object>objects\clsPlaceable</object>
     <object>objects\objLaserParticle</object>
     <object>objects\objPath</object>
+    <object>objects\objRobotParticle</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\rmRoom</room>

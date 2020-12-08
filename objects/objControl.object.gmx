@@ -231,18 +231,72 @@ if (state == SimState.observe) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// Load maps from files
-var save_data = buffer_load("room_placement.save");
-var i = 0, n, obj_n, obj, o_x, o_y;
-n = buffer_read(save_data, buffer_u16);
-for (i = 0; i &lt; n; i++) {
-    obj_n = buffer_read(save_data, buffer_u16);
-    obj = placeables[obj_n, 1];
-    o_x = buffer_read(save_data, buffer_s16);
-    o_y = buffer_read(save_data, buffer_s16);
-    instance_create(o_x, o_y, obj);
+            <string>/// SHIFT+L Load robot particles
+if (keyboard_check(vk_shift)) {
+    var file, buf, fsize, num_entries, i, fd, inst;
+    file = get_open_filename("particle file|*.part","");
+    if (file != "") {
+        fd = file_bin_open(file, 0);
+        fsize = file_bin_size(fd);
+        file_bin_close(fd);
+        num_entries = floor(fsize / 3 / buffer_sizeof(buffer_f64));
+        if (num_entries &gt; 1000) {num_entries = 1000;}
+        buf = buffer_load(file);
+        for (i = 0; i &lt; num_entries; i++) {
+            var rx, ry, rtheta;
+            rx = buffer_read(buf, buffer_f64);
+            ry = buffer_read(buf, buffer_f64);
+            rtheta = buffer_read(buf, buffer_f64);
+            show_debug_message("Creating Robot at (" + string(rx) + "," + string(ry) + "," + string(rtheta));
+            inst = instance_create(rx, ry, objRobotParticle)
+            inst.direction = rtheta;
+        }
+        buffer_delete(buf);
+        //
+        /*if (file_exists("part_cpy.part2")) {file_delete("part_cpy.part2");}
+        var fcpy = file_bin_open("part_cpy.part2", 1);
+        fd = file_bin_open(file, 0);
+        fsize = file_bin_size(fd);
+        var i, byte;
+        for (i = 0; i &lt; fsize; i++) {
+            byte = file_bin_read_byte(fd);
+            file_bin_write_byte(fcpy, byte);
+        }*/
+    }
 }
-
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Load maps from files
+if (!keyboard_check(vk_shift)) {
+    var save_data = buffer_load("room_placement.save");
+    var i = 0, n, obj_n, obj, o_x, o_y;
+    n = buffer_read(save_data, buffer_u16);
+    for (i = 0; i &lt; n; i++) {
+        obj_n = buffer_read(save_data, buffer_u16);
+        obj = placeables[obj_n, 1];
+        o_x = buffer_read(save_data, buffer_s16);
+        o_y = buffer_read(save_data, buffer_s16);
+        instance_create(o_x, o_y, obj);
+    }
+}
 </string>
           </argument>
         </arguments>
@@ -315,6 +369,8 @@ if (state == SimState.place || state == SimState.run) {
     show_debug_message("About to switch back to observe mode");
     state = SimState.observe;
 }
+
+with (objRobotParticle) {instance_destroy();}
 </string>
           </argument>
         </arguments>
