@@ -12,6 +12,7 @@
     <sprite>sprites\sprPlacer</sprite>
     <sprite>sprites\sprRobot</sprite>
     <sprite>sprites\sprRobotSmall</sprite>
+    <sprite>sprites\sprRobotInverse</sprite>
     <sprite>sprites\sprDelete</sprite>
     <sprite>sprites\sprButton</sprite>
     <sprite>sprites\sprLaserParticle</sprite>
@@ -20,6 +21,7 @@
   </sprites>
   <backgrounds name="background">
     <background>background\bckFloor</background>
+    <background>background\bckPixel</background>
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
@@ -39,6 +41,7 @@
     <object>objects\objLaserParticle</object>
     <object>objects\objPath</object>
     <object>objects\objRobotParticle</object>
+    <object>objects\objRobotParticle2</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\rmRoom</room>

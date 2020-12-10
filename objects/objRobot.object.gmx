@@ -26,6 +26,7 @@
           <argument>
             <kind>1</kind>
             <string>/// Initialize
+show_debug_message("P(" + string(x) + "," + string(y) + "," + string(direction));
 num_sensors = 21;
 angles[num_sensors - 1] = 90;
 angles[(num_sensors - 1) / 2] = 0;
@@ -75,6 +76,7 @@ buffer_write(xbuf2, buffer_f64, y);
 buffer_write(xbuf2, buffer_f64, direction);
 for (i = 0; i &lt; num_sensors; i++) {
     buffer_write(abuf, buffer_u16, angles[i]);
+    show_debug_message("Angle["+string(i)+"]="+string(angles[i]));
     var a = scrGetDistance(x,y,max_sensor_range,scrNormalizeAngle(direction + angles[i]));
     sensor_ranges[i] = a[0];
     sensor_xs[i] = a[1];

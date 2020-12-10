@@ -51,6 +51,7 @@ sim_length = 32 * 60 * 2;
 running_length = 0;
 show_debug_message("objControl: Create event");
 
+t_get_id = 0;
 </string>
           </argument>
         </arguments>
@@ -74,6 +75,45 @@ show_debug_message("objControl: Create event");
           <argument>
             <kind>1</kind>
             <string>ds_map_destroy(placeables_indices);
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="7" enumb="63">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>var i_d = ds_map_find_value(async_load, "id");
+if (i_d == t_get_id) {
+    if (ds_map_find_value(async_load, "status")) {
+        show_debug_message("Finding robot's position");
+        var t = ds_map_find_value(async_load, "value");
+        with (objRobotParticle2) {
+            if (step_number == t) {
+                sprite_index = sprRobotInverse;
+                image_alpha = 1;
+            }
+            else {
+                sprite_index = sprRobotSmall;
+                image_alpha = 0.1;
+            }
+        }
+    }
+}
 </string>
           </argument>
         </arguments>
@@ -104,6 +144,29 @@ if (state == SimState.run) {play = "&gt;";}
 draw_text(4, 4, string(running_length / 32) + "/" + string(sim_length / 32) + " " + play);
 draw_set_color(ccc);
 
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="9" enumb="84">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>t_get_id = get_integer_async("Enter step number", 0);
 </string>
           </argument>
         </arguments>
@@ -240,28 +303,67 @@ if (keyboard_check(vk_shift)) {
         fsize = file_bin_size(fd);
         file_bin_close(fd);
         num_entries = floor(fsize / 3 / buffer_sizeof(buffer_f64));
-        if (num_entries &gt; 1000) {num_entries = 1000;}
+        if (num_entries &gt; 2000) {num_entries = 2000;}
         buf = buffer_load(file);
         for (i = 0; i &lt; num_entries; i++) {
             var rx, ry, rtheta;
             rx = buffer_read(buf, buffer_f64);
+            rx = rx % room_width;
             ry = buffer_read(buf, buffer_f64);
+            ry = ry % room_height;
             rtheta = buffer_read(buf, buffer_f64);
             show_debug_message("Creating Robot at (" + string(rx) + "," + string(ry) + "," + string(rtheta));
-            inst = instance_create(rx, ry, objRobotParticle)
+            inst = instance_create(rx, ry, objRobotParticle);
             inst.direction = rtheta;
         }
         buffer_delete(buf);
-        //
-        /*if (file_exists("part_cpy.part2")) {file_delete("part_cpy.part2");}
-        var fcpy = file_bin_open("part_cpy.part2", 1);
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// CTRL + L load robot path
+/// SHIFT+L Load robot particles
+if (keyboard_check(vk_control)) {
+    var file, buf, fsize, num_entries, i, fd, inst;
+    file = get_open_filename("state data file|*.data","");
+    if (file != "") {
         fd = file_bin_open(file, 0);
         fsize = file_bin_size(fd);
-        var i, byte;
-        for (i = 0; i &lt; fsize; i++) {
-            byte = file_bin_read_byte(fd);
-            file_bin_write_byte(fcpy, byte);
-        }*/
+        file_bin_close(fd);
+        num_entries = floor(fsize / 3 / buffer_sizeof(buffer_f32));
+        if (num_entries &gt; 2000) {num_entries = 2000;}
+        buf = buffer_load(file);
+        for (i = 0; i &lt; num_entries; i++) {
+            var rx, ry, rtheta;
+            rx = buffer_read(buf, buffer_f32);
+            rx = rx % room_width;
+            ry = buffer_read(buf, buffer_f32);
+            ry = ry % room_height;
+            rtheta = buffer_read(buf, buffer_f32);
+            // show_debug_message("Creating Robot at (" + string(rx) + "," + string(ry) + "," + string(rtheta));
+            inst = instance_create(rx, ry, objRobotParticle2);
+            inst.direction = rtheta;
+            inst.step_number = i;
+        }
+        buffer_delete(buf);
     }
 }
 </string>
@@ -285,7 +387,9 @@ if (keyboard_check(vk_shift)) {
           <argument>
             <kind>1</kind>
             <string>/// Load maps from files
-if (!keyboard_check(vk_shift)) {
+if (!keyboard_check(vk_shift) &amp;&amp; !keyboard_check(vk_control)) {
+    var rx, ry, robo_exists;
+    robo_exists = 0;
     var save_data = buffer_load("room_placement.save");
     var i = 0, n, obj_n, obj, o_x, o_y;
     n = buffer_read(save_data, buffer_u16);
@@ -294,7 +398,17 @@ if (!keyboard_check(vk_shift)) {
         obj = placeables[obj_n, 1];
         o_x = buffer_read(save_data, buffer_s16);
         o_y = buffer_read(save_data, buffer_s16);
-        instance_create(o_x, o_y, obj);
+        if (obj == objRobot) {
+            robo_exists = 1;
+            rx = o_x;
+            ry = o_y;
+        }
+        else {
+            instance_create(o_x, o_y, obj);
+        }
+    }
+    if (robo_exists) {
+        instance_create(rx, ry, objRobot);
     }
 }
 </string>
@@ -357,20 +471,25 @@ if (instance_exists(objRobot)) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>show_debug_message("objControl: Escape Pressed");
-show_debug_message("state="+string(state)+", objPlacer exists = "+string(instance_exists(objPlacer)));
-if (state == SimState.place || state == SimState.run) {
-    if ((state == SimState.place) and (instance_exists(objPlacer))) {
-        with (objPlacer) {
-            show_debug_message("Deleting placer");
-            instance_destroy();
-        }
-    }
-    show_debug_message("About to switch back to observe mode");
-    state = SimState.observe;
+            <string>if (keyboard_check(ord('Q'))) {
+    with (objRobotParticle2) {instance_destroy();}
 }
-
-with (objRobotParticle) {instance_destroy();}
+else {
+    show_debug_message("objControl: Escape Pressed");
+    show_debug_message("state="+string(state)+", objPlacer exists = "+string(instance_exists(objPlacer)));
+    if (state == SimState.place || state == SimState.run) {
+        if ((state == SimState.place) and (instance_exists(objPlacer))) {
+            with (objPlacer) {
+                show_debug_message("Deleting placer");
+                instance_destroy();
+            }
+        }
+        show_debug_message("About to switch back to observe mode");
+        state = SimState.observe;
+    }
+    
+    with (objRobotParticle) {instance_destroy();}
+}
 </string>
           </argument>
         </arguments>
